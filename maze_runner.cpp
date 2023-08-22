@@ -2,7 +2,9 @@
 #include <stack>
 #include <stdexcept>
 #include <iostream>
+#include <string>
 
+using namespace std;
 // Matriz de char representnado o labirinto
 char** maze; // Voce também pode representar o labirinto como um vetor de vetores de char (vector<vector<char>>)
 
@@ -118,7 +120,7 @@ pos_t load_maze(const char *file_name)
 		{
 			fscanf(mazeFile, " %c", &maze[i][j]);
 
-			if (maze[i][j] == 'i')
+			if (maze[i][j] == 'e')
 			{
 				initial_pos.atualiza_posicao(i, j);
 			}
@@ -158,7 +160,7 @@ void walk(pos_t initial_pos)
 		next_position = valid_positions.top();
 		valid_positions.pop();
 
-		saida = (*next_position == 'o');
+		saida = (*next_position == 's');
 
 		i = next_position.get_i();
 		j = next_position.get_j();
@@ -225,7 +227,7 @@ void free_maze()
 
 int main(int argc, char *argv[])
 {
-	// carregar o labirinto com o nome do arquivo recebido como argumento (argv[])
+	//carregar o labirinto com o nome do arquivo recebido como argumento (argv[])
 	if (argc != 2)
 	{
 		throw std::runtime_error("Número de parâmetros incorreto, passe o nome do arquivo texto como parâmetro do programa");
@@ -234,8 +236,10 @@ int main(int argc, char *argv[])
 
 	char *file_name = argv[1];
 
+
+	//char file_name[] = "data/maze.txt";
+
 	pos_t initial_pos = load_maze(file_name);
-	std::cout << "linha 151" << std::endl;
 	print_maze();
 
 	printf("\n INICIO \n");
