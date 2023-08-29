@@ -3,6 +3,10 @@
 #include <stdexcept>
 #include <iostream>
 #include <string>
+#include <thread>
+
+#define IND_ENTRADA 'e'
+#define IND_SAIDA 's'
 
 using namespace std;
 // Matriz de char representnado o labirinto
@@ -83,13 +87,16 @@ std::stack<pos_t> valid_positions;
 
 void print_maze()
 {
+	system("clear");
 	for (int i = 0; i < num_rows; i++)
 	{
 		for (int j = 0; j < num_cols; j++)
 		{
 			printf("%c", maze[i][j]);
 		}
+		printf("\n");
 	}
+	this_thread::sleep_for(chrono::milliseconds(50));
 }
 
 // Função que le o labirinto de um arquivo texto, carrega em 
@@ -100,10 +107,14 @@ pos_t load_maze(const char *file_name)
 	// Abre o arquivo para leitura (fopen)
 	FILE *mazeFile;
 	mazeFile = fopen(file_name, "r");
-
+	if(mazeFile == NULL){
+		throw std::runtime_error("Arquivo não encontrado");
+	}
 	// Le o numero de linhas e colunas (fscanf)
 	// e salva em num_rows e num_cols
 	fscanf(mazeFile, "%d %d", &num_rows, &num_cols);
+
+	cout<<num_rows<<" "<<num_cols<<endl;
 
 	// Aloca a matriz maze (malloc)
 	maze = (char **)malloc(num_rows * sizeof(char *));
@@ -120,12 +131,14 @@ pos_t load_maze(const char *file_name)
 		{
 			fscanf(mazeFile, " %c", &maze[i][j]);
 
-			if (maze[i][j] == 'e')
+			if (maze[i][j] == IND_ENTRADA)
 			{
 				initial_pos.atualiza_posicao(i, j);
 			}
 		}
 	}
+
+	cout<<initial_pos.get_i()<<" "<<initial_pos.get_j()<<endl;
 
 	try
 	{
@@ -149,70 +162,66 @@ void atualizar_maze(char c, pos_t pos)
 // Recebe como entrada a posição initial e retorna um booleando indicando se a saída foi encontrada
 void walk(pos_t initial_pos)
 {
+	cout<<initial_pos.get_i()<<" "<<initial_pos.get_j()<<endl;
+
 	pos_t pos_esquerda, pos_direita, pos_cima, pos_baixo;
 	valid_positions.push(initial_pos);
 	bool saida = 0;
 	int i = 0;
 	int j = 0;
 
-	while (!saida || valid_positions.empty())
+	while (!saida && !valid_positions.empty())
 	{
+		cout<<"valid_positions: "<<endl;
+
+		// for(int i = 0; i< valid_positions.size(); i++){
+		// 	cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
+		// }
+
 		next_position = valid_positions.top();
 		valid_positions.pop();
 
-		saida = (*next_position == 's');
+		saida = (*next_position == IND_SAIDA);
 
 		i = next_position.get_i();
 		j = next_position.get_j();
 
-		pos_esquerda.atualiza_posicao(i, j - 1);
-		pos_direita.atualiza_posicao(i, j + 1);
+		pos_esquerda.atualiza_posicao(i, j + 1);
+		pos_direita.atualiza_posicao(i, j - 1);
 		pos_cima.atualiza_posicao(i - 1, j);
 		pos_baixo.atualiza_posicao(i + 1, j);
+
+		// cout << "pos_esquerda: " << *pos_esquerda << endl;
+		// cout << "pos_direita: " << *pos_direita << endl;
+		// cout << "pos_cima: " << *pos_cima << endl;
+		// cout << "pos_baixo: " << *pos_baixo << endl;
 
 		// Marcar a posição atual com o símbolo '.'
 		atualizar_maze('.', next_position);
 
-		if (*pos_esquerda == 'x')
+		if (*pos_esquerda == 'x' || *pos_esquerda == IND_SAIDA)
 		{
 			valid_positions.push(pos_esquerda);
 		}
-		if (*pos_direita == 'x')
+		if (*pos_direita == 'x' || *pos_direita == IND_SAIDA)
 		{
-			valid_positions.push(pos_esquerda);
+			valid_positions.push(pos_direita);
 		}
-		if (*pos_cima == 'x')
+		if (*pos_cima == 'x' || *pos_cima == IND_SAIDA)
 		{
 			valid_positions.push(pos_cima);
 		}
-		if (*pos_baixo == 'x')
+		if (*pos_baixo == 'x' || *pos_baixo == IND_SAIDA)
 		{
 			valid_positions.push(pos_baixo);
 		}
 
 		print_maze();
-		atualizar_maze('-', next_position);
+		atualizar_maze(' ', next_position);
 		printf("\n-----------------------------------------\n");
+		
 	}
 
-	/* Dado a posição atual, verifica quais sao as próximas posições válidas
-		Checar se as posições abaixo são validas (i>0, i<num_rows, j>0, j <num_cols)
-		e se são posições ainda não visitadas (ou seja, caracter 'x') e inserir
-		cada uma delas no vetor valid_positions
-		- pos.i, pos.j+1
-		- pos.i, pos.j-1
-		- pos.i+1, pos.j
-		- pos.i-1, pos.j
-		Caso alguma das posiçÕes validas seja igual a 's', terminar o programa
-	*/
-
-	// Imprime o labirinto
-
-	// Verifica se o vetor nao esta vazio.
-	// Caso não esteja, pegar o primeiro valor de
-	// valid_positions, remove-lo e chamar a funçao walk com esse valor
-	// pos_t next_position = valid_positions.top();
-	// valid_positions.pop();
 }
 
 void free_maze()
@@ -235,9 +244,6 @@ int main(int argc, char *argv[])
 	}
 
 	char *file_name = argv[1];
-
-
-	//char file_name[] = "data/maze.txt";
 
 	pos_t initial_pos = load_maze(file_name);
 	print_maze();
