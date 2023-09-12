@@ -153,10 +153,10 @@ void walk(pos_t initial_pos)
 		cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
 
 		current_position = valid_positions.top();
+		cout<<"apagando: "<< current_position.get_i()<<" "<<current_position.get_j()<<endl;
 		valid_positions.pop();
 		
-        cout<<"depois de pop: "<<endl;
-        cout<<"valid_positions.size(): "<<valid_positions.size()<<endl;
+        cout<<"depois de pop valid_positions.size(): "<<valid_positions.size()<<endl;
         if(valid_positions.size() > 0){
             cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
         }
@@ -188,25 +188,25 @@ void walk(pos_t initial_pos)
 		// Marcar a posição atual com o símbolo '.'
 		atualizar_maze('.', current_position);
 
-		if (*pos_esquerda == 'x' || *pos_esquerda == IND_SAIDA && *pos_esquerda < num_cols)
+		if (pos_esquerda.get_j() < num_cols && *pos_esquerda == 'x' || *pos_esquerda == IND_SAIDA)
 		{            
 			valid_positions.push(pos_esquerda);
             cout<<"pos_esquerda: "<<endl;
             cout<<pos_esquerda.get_i()<<" "<<pos_esquerda.get_j()<<endl;
 		}
-		if (*pos_direita == 'x' || *pos_direita == IND_SAIDA && *pos_direita >= 0)
+		if (pos_direita.get_j() >= 0 && *pos_direita == 'x' || *pos_direita == IND_SAIDA)
 		{
 			valid_positions.push(pos_direita);
             cout<<"pos_direita: "<<endl;
             cout<<pos_direita.get_i()<<" "<<pos_direita.get_j()<<endl;
 		}
-		if (*pos_cima == 'x' || *pos_cima == IND_SAIDA && *pos_cima >= 0)
+		if (pos_cima.get_i() >= 0 && *pos_cima == 'x' || *pos_cima == IND_SAIDA)
 		{
 			valid_positions.push(pos_cima);
             cout<<"pos_cima: "<<endl;
             cout<<pos_cima.get_i()<<" "<<pos_cima.get_j()<<endl;
 		}
-		if (*pos_baixo == 'x' || *pos_baixo == IND_SAIDA && *pos_baixo < num_rows)
+		if (pos_baixo.get_i() < num_rows && *pos_baixo == 'x' || *pos_baixo == IND_SAIDA)
 		{
 			valid_positions.push(pos_baixo);
             cout<<"pos_baixo: "<<endl;
