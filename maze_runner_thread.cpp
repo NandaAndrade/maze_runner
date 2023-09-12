@@ -15,6 +15,8 @@ char** maze; // Voce também pode representar o labirinto como um vetor de vetor
 // Numero de linhas e colunas do labirinto
 int num_rows;
 int num_cols;
+int num_threads = 0;
+bool saidaa = 0;
 
 // Representação de uma posição
 // Posição a ser explorada
@@ -67,7 +69,7 @@ public:
 
 void print_maze()
 {
-	//system("clear");
+	system("clear");
 	for (int i = 0; i < num_rows; i++)
 	{
 		for (int j = 0; j < num_cols; j++)
@@ -76,7 +78,8 @@ void print_maze()
 		}
 		printf("\n");
 	}
-	this_thread::sleep_for(chrono::milliseconds(100));
+	printf("\n-----------------------------------------\n");
+	this_thread::sleep_for(chrono::milliseconds(55));
 }
 
 
@@ -143,31 +146,34 @@ void walk(pos_t initial_pos)
 	bool saida = 0;
 	int i = 0;
 	int j = 0;
+	int id = num_threads;
+	num_threads++;
     pos_t current_position;
     std::stack<pos_t> valid_positions;
     valid_positions.push(initial_pos);
 
 	while (!saida && !valid_positions.empty())
 	{
-		cout<<"current_positions: "<<endl;
-		cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
+		// printf("\n-----------------------------------------\n");
+		// cout<<id<< ": "<<"current_positions: "<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
 
 		current_position = valid_positions.top();
-		cout<<"apagando: "<< current_position.get_i()<<" "<<current_position.get_j()<<endl;
+		// cout<<id<< ": "<<"apagando: "<< current_position.get_i()<<" "<<current_position.get_j()<<endl;
 		valid_positions.pop();
 		
-        cout<<"depois de pop valid_positions.size(): "<<valid_positions.size()<<endl;
-        if(valid_positions.size() > 0){
-            cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
-        }
+        // cout<<id<< ": "<<"depois de pop valid_positions.size(): "<<valid_positions.size()<<endl;
+        // if(valid_positions.size() > 0){
+        //     cout<<id<< ": "<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
+        // }
 
         if(valid_positions.size() > 0) {
-            cout << "Criando thread" << endl;
-            cout<<"valid_positions: "<<endl;
-			cout<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
+            // cout <<id<< ": "<< "Criando thread" << endl;
+            // cout<<id<< ": "<<"valid_positions: "<<endl;
+			// cout<<id<< ": "<<valid_positions.top().get_i()<<" "<<valid_positions.top().get_j()<<endl;
             thread new_thread(walk, valid_positions.top());
-            valid_positions.pop();
             new_thread.detach();
+			// cout<<id<< ": "<<"trhead criada, dando pop"<<endl;
+			valid_positions.pop();
         }
 
 		saida = (*current_position == IND_SAIDA);
@@ -180,44 +186,62 @@ void walk(pos_t initial_pos)
 		pos_cima.atualiza_posicao(i - 1, j);
 		pos_baixo.atualiza_posicao(i + 1, j);
 
-		// cout << "pos_esquerda: " << *pos_esquerda << endl;
-		// cout << "pos_direita: " << *pos_direita << endl;
-		// cout << "pos_cima: " << *pos_cima << endl;
-		// cout << "pos_baixo: " << *pos_baixo << endl;
+		// cout <<id<< ": "<< "pos_esquerda: " << pos_esquerda.get_i()<< " "<< pos_esquerda.get_j() << endl;
+		// cout <<id<< ": "<< "pos_direita: " << pos_direita.get_i() << " "<< pos_direita.get_j() << endl;
+		// cout <<id<< ": "<< "pos_cima: " << pos_cima.get_i() <<" "<< pos_cima.get_j() << endl;
+		// cout <<id<< ": "<< "pos_baixo: " << pos_baixo.get_i()<< " " << pos_baixo.get_j() << endl;
 
 		// Marcar a posição atual com o símbolo '.'
 		atualizar_maze('.', current_position);
 
-		if (pos_esquerda.get_j() < num_cols && *pos_esquerda == 'x' || *pos_esquerda == IND_SAIDA)
-		{            
-			valid_positions.push(pos_esquerda);
-            cout<<"pos_esquerda: "<<endl;
-            cout<<pos_esquerda.get_i()<<" "<<pos_esquerda.get_j()<<endl;
+		if(pos_esquerda.get_j() < num_cols){
+			if (*pos_esquerda == 'x' || *pos_esquerda == IND_SAIDA)
+			{            
+				valid_positions.push(pos_esquerda);
+				// cout<<id<< ": "<<"pos_esquerda: "<< ": "<<pos_esquerda.get_i()<<" "<<pos_esquerda.get_j()<<endl;
+			}
 		}
-		if (pos_direita.get_j() >= 0 && *pos_direita == 'x' || *pos_direita == IND_SAIDA)
-		{
-			valid_positions.push(pos_direita);
-            cout<<"pos_direita: "<<endl;
-            cout<<pos_direita.get_i()<<" "<<pos_direita.get_j()<<endl;
+		else{
+			// cout<<id<< ": "<<"else pos_esquerda: "<< pos_esquerda.get_i()<<" "<<pos_esquerda.get_j()<<endl;
 		}
-		if (pos_cima.get_i() >= 0 && *pos_cima == 'x' || *pos_cima == IND_SAIDA)
-		{
-			valid_positions.push(pos_cima);
-            cout<<"pos_cima: "<<endl;
-            cout<<pos_cima.get_i()<<" "<<pos_cima.get_j()<<endl;
+		if(pos_direita.get_j() >= 0){
+			if ( *pos_direita == 'x' || *pos_direita == IND_SAIDA)
+			{
+				valid_positions.push(pos_direita);
+				// cout<<id<< ": "<<"pos_direita: "<<pos_direita.get_i()<<" "<<pos_direita.get_j()<<endl;
+			}
 		}
-		if (pos_baixo.get_i() < num_rows && *pos_baixo == 'x' || *pos_baixo == IND_SAIDA)
-		{
-			valid_positions.push(pos_baixo);
-            cout<<"pos_baixo: "<<endl;
-            cout<<pos_baixo.get_i()<<" "<<pos_baixo.get_j()<<endl;
+		else{
+			// cout<<id<< ": "<<"else pos_direita: "<<pos_direita.get_i()<<" "<<pos_direita.get_j()<<endl;
+		}
+		if(pos_cima.get_i() >= 0){
+			if (*pos_cima == 'x' || *pos_cima == IND_SAIDA)
+			{
+				valid_positions.push(pos_cima);
+				// cout<<id<< ": "<<"pos_cima: "<<pos_cima.get_i()<<" "<<pos_cima.get_j()<<endl;
+			}
+		}
+		else{
+			// cout<<id<< ": "<<"else pos_cima: "<<pos_cima.get_i()<<" "<<pos_cima.get_j()<<endl;
+		}
+		if(pos_baixo.get_i() < num_rows ){
+			if (*pos_baixo == 'x' || *pos_baixo == IND_SAIDA)
+			{
+				valid_positions.push(pos_baixo);
+				// cout<<id<< ": "<<"pos_baixo: "<<pos_baixo.get_i()<<" "<<pos_baixo.get_j()<<endl;
+			}
+		}
+		else{
+			// cout<<id<< ": "<<"else pos_baixo: "<<pos_baixo.get_i()<<" "<<pos_baixo.get_j()<<endl;
 		}
 
-		print_maze();
 		atualizar_maze(' ', current_position);
-		printf("\n-----------------------------------------\n");
+		this_thread::sleep_for(chrono::milliseconds(100));
 		
 	}
+
+	if(saida == 1)
+		saidaa = saida;
 
 }
 
@@ -245,8 +269,14 @@ int main(int argc, char *argv[])
 	print_maze();
 
 	printf("\n INICIO \n");
-	walk(initial_pos);
+	thread new_thread(walk, initial_pos);
+	
+	while(!saidaa){
+		cout<<"saidaa: "<<saidaa<<endl;
+		print_maze();
 
+	}
+	new_thread.detach();
 	free_maze();
 
 	return 0;
